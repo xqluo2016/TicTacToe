@@ -1,0 +1,157 @@
+<html>
+<head>
+<title>TicTacToe</title>
+
+<style>
+table tr td{
+border: 1px solid black;
+}
+
+td{
+width: 100px;
+height: 100px;
+font-size: 80px;
+line-height: 80px;
+text-align: center;
+padding: 0;
+margin: 0;
+}
+
+</style>
+</head>
+<body>
+
+
+<table>
+ <tr><td id="a00" onclick="doClicked(this,0,0)"></td><td id="a01" onclick="doClicked(this,0,1)"></td><td id="a02" onclick="doClicked(this,0,2)"></td></tr>
+ <tr><td id="a10" onclick="doClicked(this,1,0)"></td><td id="a11" onclick="doClicked(this,1,1)"></td><td id="a12" onclick="doClicked(this,1,2)"></td></tr>
+ <tr><td id="a20" onclick="doClicked(this,2,0)"></td><td id="a21" onclick="doClicked(this,2,1)"></td><td id="a22" onclick="doClicked(this,2,2)"></td></tr>
+</table>
+
+
+<script>
+
+var model=[];
+var gameOver=false;
+
+function init(){
+  for(var y=0;y<3;y++)
+    for(var x=0;x<3;x++)
+    {
+ document.all["a"+y+x].innerText="";
+    }
+ model=[
+  [0, 0, 0],
+  [0, 0, 0],
+  [0, 0, 0]
+  ];
+ step=0;
+ gameOver=false;
+}
+
+init();
+
+var step=0;
+function log(msg)
+{
+
+}
+
+function tick(y,x)
+{
+ log("ticking " + y +"," + x);
+ step++;
+ var value = step%2==1? "o" : "x";
+ model[y][x]=value;
+ document.all["a"+y+x].innerText = value;
+ if(isWin(y,x))
+ {
+  alert("Game Over! " + model[y][x] +" win!");
+  gameOver=true;
+ }
+ if(step==9){
+  alert("Game Over in a draw!");
+  gameOver=true;
+ }
+}
+
+function doClicked(cell, y, x){
+log("doClicked("+y+","+x+")");
+if(model[y][x]==0 && !gameOver){
+ tick(y,x);
+ if(!gameOver){
+  var r = robot();
+  tick(r[0],r[1]); 
+ }
+}
+}
+
+function isWin(y,x)
+{
+ var value = model[y][x];
+ var win = model[y][0]==value && model[y][1]==value && model[y][2]==value
+     || model[0][x]==value && model[1][x]==value && model[2][x]==value
+     || (y==x) && model[0][0]==value && model[1][1]==value && model[2][2]==value
+     || (y+x==2) && model[2][0]==value && model[1][1]==value && model[0][2]==value
+ return win;
+}
+
+
+function robot(){
+ var best=[];
+ var max=0;
+   for(var y=0;y<3;y++)
+    for(var x=0;x<3;x++)
+    {
+      if(model[y][x]==0)
+      {
+       var value = chess(y,x);
+       if(value>max|| best.length==0)
+       {
+        best=[y,x];
+        max=value;
+       }
+      }
+    }
+ log("best is: " + best[0] +"," + best[1]);
+ return best;
+}
+
+function chess(y, x)
+{
+ if(model[y][x]==0){
+   step++;
+   var value = step%2==1? "o" : "x";
+   model[y][x]=value;
+   
+   var weight=0; 
+   if(isWin(y,x)) 
+   { 
+    weight=1024;
+   }
+   else
+   {
+    var count=0;
+    for(var yy=0;yy<3;yy++)
+    { for(var xx=0;xx<3;xx++)
+      {
+        weight -= chess(yy,xx);
+        count ++;
+      }
+    }
+    if(count!=0)
+    weight = weight/count;
+   }
+   model[y][x]=0;
+   step--;
+   log("step=" + step + " y="+y +" x="+x +" w=" + weight);
+  return weight;
+ }else{ return 0;}
+}
+
+</script>
+
+
+</body>
+</html>
+
